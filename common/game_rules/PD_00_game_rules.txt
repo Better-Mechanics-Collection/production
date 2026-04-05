@@ -1,0 +1,25 @@
+############################
+### PD Custom Game Rules ###
+############################
+
+##################
+### Game Rules ###
+##################
+
+maintenance_options = {
+	name = "RULE_MAINTENANCE_COST"
+	group = "RULE_GROUP_MAINTENANCE_COST_RULES"
+	icon = "GFX_game_rule_lend_lease"
+	default = {
+		name = "ENABLED"
+		text = "RULE_OPTION_ENABLED_MAINTENANCE"
+		desc = "RULE_OPTION_ENABLED_MAINTENANCE_DESC"
+		allow_achievements = yes
+	}
+	option = {
+		name = "DISABLED"
+		text = "RULE_OPTION_DISABLED_MAINTENANCE"
+		desc = "RULE_OPTION_DISABLED_MAINTENANCE_DESC"
+		allow_achievements = yes
+	}
+}

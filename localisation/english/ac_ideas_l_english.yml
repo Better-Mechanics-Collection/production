@@ -1,0 +1,22 @@
+﻿l_english:
+ # ECONOMY
+
+const_amount_cost_rise_modifier:0 "Increasing Complexity of Logistics"
+MILS_COST_LOC:0 "Due to increasing complexity of logistics our next §YMilitary Factory§! will be [?mils_amount_cost_rise|%R0] more expensive to build"
+CIVS_COST_LOC:0 "Due to increasing complexity of logistics our next §YCivilian Factory§! will be [?civs_amount_cost_rise|%R0] more expensive to build"
+DOCKS_COST_LOC:0 "Due to increasing complexity of logistics our next §YDockyard§! will be [?docks_amount_cost_rise|%R0] more expensive to build"
+
+RULE_MAINTENANCE_COST:0 "Maintenance Costs"
+RULE_GROUP_MAINTENANCE_COST_RULES:0 "Maintenance Cost Mechanics"
+RULE_OPTION_ENABLED_MAINTENANCE:0 "Enabled"
+RULE_OPTION_ENABLED_MAINTENANCE_DESC:0 "Maintenance Costs of Factories will be applied"
+		
+RULE_OPTION_DISABLED_MAINTENANCE:0 "Disabled"
+RULE_OPTION_DISABLED_MAINTENANCE_DESC:0 "Maintenance Costs of Factories will NOT be applied"
+
+RULE_CFR_COST:0 "Civilian Factories Resource Usage"
+RULE_OPTION_ENABLED_CFR:0 "Enabled"
+RULE_OPTION_ENABLED_CFR_DESC:0 "Civilian Factories will require Chromium, Oil and Steel to function properly, and you will get gradual penalties for lacking the resources to fuel them"
+		
+RULE_OPTION_DISABLED_CFR:0 "Disabled"
+RULE_OPTION_DISABLED_CFR_DESC:0 "Civilian Factories will NOT require resources to function"

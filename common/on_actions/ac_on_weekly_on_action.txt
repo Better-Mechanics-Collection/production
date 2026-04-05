@@ -1,0 +1,76 @@
+on_actions = {
+    on_weekly = {
+        effect = {
+
+            ###############################################
+            # MIL: cost_rise = mils² × 0.00004
+            set_variable = {
+                var = mils_amount_cost_rise
+                value = num_of_military_factories
+            }
+            multiply_variable = {
+                var = mils_amount_cost_rise
+                value = mils_amount_cost_rise
+            }
+            multiply_variable = {
+                var = mils_amount_cost_rise
+                value = 0.00004
+            }
+            # AI cap at 1.00 (100% cost increase), player uncapped
+            if = {
+                limit = { is_ai = yes }
+                clamp_variable = {
+                    var = mils_amount_cost_rise
+                    min = 0
+                    max = 5.0
+                }
+            }
+            ###############################################
+            # CIV: cost_rise = civs² × 0.00002
+            set_variable = {
+                var = civs_amount_cost_rise
+                value = num_of_civilian_factories
+            }
+            multiply_variable = {
+                var = civs_amount_cost_rise
+                value = civs_amount_cost_rise
+            }
+            multiply_variable = {
+                var = civs_amount_cost_rise
+                value = 0.00002
+            }
+            if = {
+                limit = { is_ai = yes }
+                clamp_variable = {
+                    var = civs_amount_cost_rise
+                    min = 0
+                    max = 5.0
+                }
+            }
+            ###############################################
+            # DOCKS: cost_rise = docks² × 0.0002
+            set_variable = {
+                var = docks_amount_cost_rise
+                value = num_of_naval_factories
+            }
+            multiply_variable = {
+                var = docks_amount_cost_rise
+                value = docks_amount_cost_rise
+            }
+            multiply_variable = {
+                var = docks_amount_cost_rise
+                value = 0.0002			
+            }
+            if = {
+                limit = { is_ai = yes }
+                clamp_variable = {
+                    var = docks_amount_cost_rise
+                    min = 0
+                    max = 5.0
+                }
+            }
+            ###############################################
+
+        }
+    }
+}

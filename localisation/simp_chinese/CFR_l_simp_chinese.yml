@@ -1,0 +1,25 @@
+﻿l_simp_chinese:
+    # Utility
+    CFR_EMPTY_STR: ""
+    
+    # Modifiers
+    CFR_resource_modifier:       "£civ_factory $industrial_complex$ Input"
+    CFR_factory_output_modifier: "£civ_factory_output $industrial_complex$ Input Shortage"
+    
+    # Decision Category
+    CFR_decision_category:      "Civilian Factory Resources"
+    CFR_decision_category_desc: "$CFR_desc_byline$$CFR_desc_resources$$CFR_desc_factories$[CFR_technology_desc][CFR_input_shortage_desc]"
+    
+    CFR_desc_byline: "As our civilian industrial capacity grows, it will require additional resources to keep operating at full capacity."
+    
+    CFR_desc_resources: "\n\nWe currently need §Y[?CFR_steel_usage]§! §4$PRODUCTION_MATERIALS_STEEL$§! and §Y[?CFR_chromium_usage]§! §6$PRODUCTION_MATERIALS_CHROMIUM$§! for our §Y[?num_of_civilian_factories] Civilian Factories§!."
+    
+    CFR_desc_factories: "\n\n§Y[?CFR_light_industry]§! of our Civilian Factories require §G50% fewer§! resources due to being allocated for low-intensity purposes, such as $PRODUCTION_CONSUMER_GOODS$, $CONSTRUCTION_FACTORIES_PROJECTS_LABEL$, and $CONSTRUCTION_FACTORIES_TRADE_LABEL$."
+    
+    # Tech texts are hard-coded because I'm lazy lol
+    CFR_desc_tech_1: "\n\nWe require §G5% fewer§! input resources because we researched §H$construction2$§!."
+    CFR_desc_tech_2: "\n\nWe require §G10% fewer§! input resources because we researched §H$construction3$§!."
+    CFR_desc_tech_3: "\n\nWe require §G15% fewer§! input resources because we researched §H$construction4$§!."
+    CFR_desc_tech_4: "\n\nWe require §G20% fewer§! input resources because we researched §H$construction5$§!."
+    
+    CFR_desc_shortage: "\n\nWe currently have an §tinput shortage§! of [?CFR_steel_deficit|0-] §4$PRODUCTION_MATERIALS_STEEL$§! and [?CFR_chromium_deficit|0-] §6$PRODUCTION_MATERIALS_CHROMIUM$§!, leading to a §treduction§! in $industrial_complex$ output of [?CFR_factory_output_reduction|%.2+]."

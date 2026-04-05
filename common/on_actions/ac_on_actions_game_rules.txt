@@ -1,0 +1,27 @@
+on_actions = {
+	on_startup = {
+		effect = {
+			# Maintenance Cost
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = maintenance_options
+						option = DISABLED
+					}
+				}
+				set_global_flag = maintenance_disabled
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = CFR_options
+						option = DISABLED
+					}
+				}
+				set_global_flag = CFR_disabled
+			}
+		}
+	}
+}
+
+

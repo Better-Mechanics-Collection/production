@@ -1,0 +1,11 @@
+const_amount_cost_rise_modifier = {
+	enable = {
+		NOT = { has_global_flag = maintenance_disabled }
+	}
+
+	production_cost_arms_factory_factor = mils_amount_cost_rise
+	conversion_cost_civ_to_mil_factor = mils_amount_cost_rise
+	production_cost_industrial_complex_factor = civs_amount_cost_rise
+	conversion_cost_mil_to_civ_factor = civs_amount_cost_rise
+	production_cost_dockyard_factor = docks_amount_cost_rise
+}

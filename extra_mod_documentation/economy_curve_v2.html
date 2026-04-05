@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Economy Status — Construction Cost Curves</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --panel: #12130f;
+    --border: #2a2a1a;
+    --gold: #c8a84b;
+    --gold-dim: #7a6428;
+    --red: #c0392b;
+    --text: #d4c89a;
+    --text-dim: #6b6244;
+    --mil: #e8934a;
+    --civ: #5b9bd5;
+    --dock: #7ec8a0;
+    --grid: #1a1a12;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, #161610 39px, #161610 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, #161610 39px, #161610 40px);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 920px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    display: inline-block;
+    padding: 6px 28px;
+  }
+
+  .header h1::before, .header h1::after {
+    content: '⚙';
+    color: var(--gold-dim);
+    margin: 0 10px;
+    font-size: 0.65em;
+    vertical-align: middle;
+  }
+
+  .header p {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 0.12em;
+  }
+
+  /* Tab switcher */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .tab {
+    padding: 7px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: #0d0d0f;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .tab:hover { color: var(--text); background: #141410; }
+
+  .tab.active-mil { background: var(--panel); color: var(--mil); border-color: var(--mil); border-bottom: 1px solid var(--panel); }
+  .tab.active-civ { background: var(--panel); color: var(--civ); border-color: var(--civ); border-bottom: 1px solid var(--panel); }
+  .tab.active-dock { background: var(--panel); color: var(--dock); border-color: var(--dock); border-bottom: 1px solid var(--panel); }
+  .tab.active-all { background: var(--panel); color: var(--gold); border-color: var(--gold-dim); border-bottom: 1px solid var(--panel); }
+
+  .chart-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px 24px 18px;
+    position: relative;
+  }
+
+  .chart-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
+  }
+
+  canvas { width: 100%; display: block; cursor: crosshair; }
+
+  .legend {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.2s;
+  }
+
+  .legend-item.dimmed { opacity: 0.3; }
+
+  .swatch {
+    width: 24px; height: 3px; border-radius: 2px;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .stat-card {
+    background: #0f0f0c;
+    border: 1px solid var(--border);
+    padding: 11px 14px;
+  }
+
+  .stat-card.mil { border-left: 2px solid var(--mil); }
+  .stat-card.civ { border-left: 2px solid var(--civ); }
+  .stat-card.dock { border-left: 2px solid var(--dock); }
+
+  .stat-label { font-size: 0.58rem; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .stat-value { font-size: 1.05rem; font-family: 'Cinzel', serif; }
+  .stat-value.mil { color: var(--mil); }
+  .stat-value.civ { color: var(--civ); }
+  .stat-value.dock { color: var(--dock); }
+  .stat-sub { font-size: 0.6rem; color: var(--text-dim); margin-top: 2px; }
+
+  .tooltip {
+    position: absolute;
+    background: #161610;
+    border: 1px solid var(--gold-dim);
+    padding: 9px 13px;
+    font-size: 0.67rem;
+    pointer-events: none;
+    display: none;
+    z-index: 20;
+    min-width: 180px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+
+  .tt-title {
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    margin-bottom: 6px;
+    border-bottom: 1px solid #2a2a1a;
+    padding-bottom: 5px;
+  }
+
+  .tt-row { display: flex; justify-content: space-between; gap: 14px; margin-top: 3px; }
+  .tt-key { color: var(--text-dim); }
+  .tt-mil { color: var(--mil); }
+  .tt-civ { color: var(--civ); }
+  .tt-dock { color: var(--dock); }
+
+  .ai-note {
+    font-size: 0.6rem;
+    color: rgba(192,57,43,0.6);
+    letter-spacing: 0.09em;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* Coefficient badges */
+  .coeff-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .coeff-badge {
+    font-size: 0.62rem;
+    padding: 3px 10px;
+    border: 1px solid;
+    letter-spacing: 0.08em;
+  }
+
+  .coeff-badge.mil { border-color: var(--mil); color: var(--mil); background: rgba(232,147,74,0.06); }
+  .coeff-badge.civ { border-color: var(--civ); color: var(--civ); background: rgba(91,155,213,0.06); }
+  .coeff-badge.dock { border-color: var(--dock); color: var(--dock); background: rgba(126,200,160,0.06); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Economy Status</h1>
+    <p>Construction Cost Scaling — All Factory Types — Quadratic Formula</p>
+  </div>
+
+  <div class="coeff-row">
+    <div class="coeff-badge mil">MIL  x² × 0.00004</div>
+    <div class="coeff-badge civ">CIV  x² × 0.00002</div>
+    <div class="coeff-badge dock">DOCK  x² × 0.0002</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active-all" data-mode="all">All</div>
+    <div class="tab" data-mode="mil">Military</div>
+    <div class="tab" data-mode="civ">Civilian</div>
+    <div class="tab" data-mode="dock">Dockyards</div>
+  </div>
+
+  <div class="chart-panel">
+    <div class="tooltip" id="tooltip">
+      <div class="tt-title" id="tt-title">— Factories</div>
+      <div class="tt-row"><span class="tt-key">MIL cost</span><span class="tt-mil" id="tt-mil">—</span></div>
+      <div class="tt-row"><span class="tt-key">CIV cost</span><span class="tt-civ" id="tt-civ">—</span></div>
+      <div class="tt-row"><span class="tt-key">DOCK cost</span><span class="tt-dock" id="tt-dock">—</span></div>
+    </div>
+    <canvas id="chart" height="400"></canvas>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item" data-type="mil"><div class="swatch" style="background:#e8934a"></div><span style="color:#e8934a">Military Factories</span></div>
+    <div class="legend-item" data-type="civ"><div class="swatch" style="background:#5b9bd5"></div><span style="color:#5b9bd5">Civilian Factories</span></div>
+    <div class="legend-item" data-type="dock"><div class="swatch" style="background:#7ec8a0"></div><span style="color:#7ec8a0">Naval Dockyards</span></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card mil">
+      <div class="stat-label">Germany ~90 MIL</div>
+      <div class="stat-value mil">+32.4%</div>
+      <div class="stat-sub">7200 → 9,533 CIC</div>
+    </div>
+    <div class="stat-card civ">
+      <div class="stat-label">USA ~159 CIV</div>
+      <div class="stat-value civ">+50.6%</div>
+      <div class="stat-sub">10800 → 16,265 CIC</div>
+    </div>
+    <div class="stat-card dock">
+      <div class="stat-label">Japan ~45 Docks</div>
+      <div class="stat-value dock">+40.5%</div>
+      <div class="stat-sub">6400 → 8,992 CIC</div>
+    </div>
+  </div>
+
+  <div class="ai-note">▲ AI hard-capped at +500% — player curve is fully uncapped</div>
+</div>
+
+<script>
+const canvas = document.getElementById('chart');
+const ctx    = canvas.getContext('2d');
+const panel  = canvas.parentElement;
+const tooltip = document.getElementById('tooltip');
+
+// Formulas
+const curves = {
+  mil:  { coeff: 0.00004, color: '#e8934a', label: 'Military',  maxX: 350, baseCost: 7200  },
+  civ:  { coeff: 0.00002, color: '#5b9bd5', label: 'Civilian',  maxX: 350, baseCost: 10800 },
+  dock: { coeff: 0.0002,  color: '#7ec8a0', label: 'Dockyards', maxX: 120, baseCost: 6400  },
+};
+
+const AI_CAP = 5.0;
+
+// Notable countries per type
+const markers = {
+  mil:  [ {x:40,l:'ITA'}, {x:60,l:'JAP'}, {x:90,l:'GER'}, {x:130,l:'USSR'}, {x:180,l:'USA'} ],
+  civ:  [ {x:40,l:'ITA'}, {x:70,l:'GER'}, {x:120,l:'USSR'}, {x:159,l:'USA'} ],
+  dock: [ {x:15,l:'GER'}, {x:28,l:'UK'}, {x:45,l:'JAP'}, {x:60,l:'USA'} ],
+};
+
+let mode = 'all';
+
+function penalty(coeff, x) { return x * x * coeff; }
+
+function draw() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = panel.clientWidth - 48;
+  const H = 390;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+
+  const PAD = { top: 28, right: 28, bottom: 50, left: 68 };
+  const CW = W - PAD.left - PAD.right;
+  const CH = H - PAD.top  - PAD.bottom;
+
+  // Determine what to show
+  const show = mode === 'all'
+    ? ['mil','civ','dock']
+    : [mode];
+
+  // Dynamic x/y range
+  const maxX = mode === 'dock' ? 120 : 350;
+  // y range: find max penalty in view, round up nicely
+  let rawMax = 0;
+  show.forEach(k => {
+    const p = penalty(curves[k].coeff, maxX);
+    if (p > rawMax) rawMax = p;
+  });
+  rawMax = Math.min(rawMax * 1.1, 8.0);
+  // Nice ceil
+  const niceMax = rawMax <= 1 ? 1 : rawMax <= 2 ? 2 : rawMax <= 3 ? 3 : rawMax <= 4 ? 4 : rawMax <= 5 ? 5 : rawMax <= 6 ? 6 : 8;
+
+  function cx(v) { return PAD.left + (v / maxX) * CW; }
+  function cy(v) { return PAD.top  + CH * (1 - Math.min(v, niceMax) / niceMax); }
+
+  // Y ticks
+  const yStep = niceMax <= 2 ? 0.5 : niceMax <= 4 ? 1 : niceMax <= 6 ? 1 : 2;
+  const yTicks = [];
+  for (let y = 0; y <= niceMax + 0.01; y += yStep) yTicks.push(parseFloat(y.toFixed(2)));
+
+  const xStep = maxX <= 120 ? 20 : 50;
+  const xTicks = [];
+  for (let x = 0; x <= maxX; x += xStep) xTicks.push(x);
+
+  // Background grid
+  ctx.strokeStyle = '#1e1e14';
+  ctx.lineWidth = 1;
+  yTicks.forEach(y => {
+    ctx.beginPath();
+    ctx.moveTo(PAD.left, cy(y));
+    ctx.lineTo(PAD.left + CW, cy(y));
+    ctx.stroke();
+  });
+  xTicks.forEach(x => {
+    ctx.beginPath();
+    ctx.moveTo(cx(x), PAD.top);
+    ctx.lineTo(cx(x), PAD.top + CH);
+    ctx.stroke();
+  });
+
+  // AI cap line
+  if (AI_CAP <= niceMax) {
+    ctx.setLineDash([7, 4]);
+    ctx.strokeStyle = 'rgba(192, 57, 43, 0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(PAD.left, cy(AI_CAP));
+    ctx.lineTo(PAD.left + CW, cy(AI_CAP));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(192,57,43,0.65)';
+    ctx.font = '9px Share Tech Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText('AI CAP  +500%', PAD.left + 6, cy(AI_CAP) - 5);
+  }
+
+  // Country markers
+  show.forEach(k => {
+    if (mode !== 'all' || k === mode) {
+      (markers[k] || []).forEach(m => {
+        if (m.x > maxX) return;
+        ctx.strokeStyle = curves[k].color;
+        ctx.globalAlpha = 0.22;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(cx(m.x), PAD.top + 18);
+        ctx.lineTo(cx(m.x), PAD.top + CH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = curves[k].color;
+        ctx.font = 'bold 9px Share Tech Mono';
+        ctx.textAlign = 'center';
+        ctx.globalAlpha = 0.75;
+        ctx.fillText(m.l, cx(m.x), PAD.top + 14);
+        ctx.globalAlpha = 1;
+      });
+    }
+  });
+
+  // Draw curves
+  show.forEach(k => {
+    const c = curves[k];
+    const pts = [];
+    const steps = Math.min(maxX * 2, 700);
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * maxX;
+      const y = penalty(c.coeff, x);
+      pts.push({ x, y });
+    }
+
+    // Gradient fill
+    const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + CH);
+    const hex = c.color;
+    grad.addColorStop(0,   hex + '44');
+    grad.addColorStop(0.5, hex + '18');
+    grad.addColorStop(1,   hex + '00');
+
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(cx(p.x), cy(p.y));
+      else ctx.lineTo(cx(p.x), cy(p.y));
+    });
+    ctx.lineTo(cx(maxX), cy(0));
+    ctx.lineTo(cx(0), cy(0));
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = mode === 'all' ? 0.5 : 0.65;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Stroke
+    ctx.strokeStyle = c.color;
+    ctx.lineWidth = mode === 'all' ? 2 : 2.5;
+    ctx.shadowColor = c.color;
+    ctx.shadowBlur = mode === 'all' ? 4 : 8;
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(cx(p.x), cy(p.y));
+      else ctx.lineTo(cx(p.x), cy(p.y));
+    });
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // End label
+    const lastPt = pts[pts.length - 1];
+    const labelY = Math.min(lastPt.y, niceMax);
+    if (labelY > niceMax * 0.05) {
+      ctx.fillStyle = c.color;
+      ctx.font = 'bold 9px Share Tech Mono';
+      ctx.textAlign = 'left';
+      ctx.globalAlpha = 0.85;
+      ctx.fillText(c.label, cx(maxX) + 4, cy(labelY) + 4);
+      ctx.globalAlpha = 1;
+    }
+  });
+
+  // Axes
+  ctx.strokeStyle = '#3a3a2a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(PAD.left, PAD.top);
+  ctx.lineTo(PAD.left, PAD.top + CH);
+  ctx.lineTo(PAD.left + CW, PAD.top + CH);
+  ctx.stroke();
+
+  // Y labels
+  ctx.textAlign = 'right';
+  yTicks.forEach(y => {
+    const isAiCap = Math.abs(y - AI_CAP) < 0.01;
+    ctx.fillStyle = isAiCap ? 'rgba(192,57,43,0.8)' : '#5a5438';
+    ctx.font = `${isAiCap ? 'bold ' : ''}10px Share Tech Mono`;
+    ctx.fillText(`+${Math.round(y * 100)}%`, PAD.left - 8, cy(y) + 4);
+  });
+
+  // X labels
+  ctx.fillStyle = '#5a5438';
+  ctx.font = '10px Share Tech Mono';
+  ctx.textAlign = 'center';
+  xTicks.forEach(x => {
+    if (x === 0) return;
+    ctx.fillText(x, cx(x), PAD.top + CH + 18);
+  });
+
+  // Axis titles
+  ctx.fillStyle = '#4a4432';
+  ctx.font = '10px Share Tech Mono';
+  ctx.textAlign = 'center';
+  const xLabel = mode === 'dock' ? 'Naval Dockyards' : mode === 'mil' ? 'Military Factories' : mode === 'civ' ? 'Civilian Factories' : 'Factory Count';
+  ctx.fillText(xLabel, PAD.left + CW / 2, H - 5);
+  ctx.save();
+  ctx.translate(11, PAD.top + CH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Cost Increase', 0, 0);
+  ctx.restore();
+
+  // Store for mouse
+  canvas._pad = PAD; canvas._CW = CW; canvas._CH = CH;
+  canvas._maxX = maxX; canvas._niceMax = niceMax;
+}
+
+// Tooltip
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const PAD = canvas._pad; if (!PAD) return;
+  const mx = e.clientX - rect.left;
+
+  const facs = Math.round(((mx - PAD.left) / canvas._CW) * canvas._maxX);
+  if (facs < 0 || facs > canvas._maxX) { tooltip.style.display = 'none'; return; }
+
+  document.getElementById('tt-title').textContent = `${facs} Factories`;
+
+  const milP  = penalty(curves.mil.coeff,  facs);
+  const civP  = penalty(curves.civ.coeff,  facs);
+  const dockP = penalty(curves.dock.coeff, facs);
+
+  document.getElementById('tt-mil').textContent  = `+${(milP*100).toFixed(1)}%  →  ${Math.round(7200*(1+milP)).toLocaleString()} CIC`;
+  document.getElementById('tt-civ').textContent  = `+${(civP*100).toFixed(1)}%  →  ${Math.round(10800*(1+civP)).toLocaleString()} CIC`;
+  document.getElementById('tt-dock').textContent = `+${(dockP*100).toFixed(1)}%  →  ${Math.round(6400*(1+dockP)).toLocaleString()} CIC`;
+
+  tooltip.style.display = 'block';
+  let tx = e.clientX - rect.left + 14;
+  let ty = e.clientY - rect.top - 10;
+  if (tx + 200 > rect.width) tx -= 215;
+  if (ty < 0) ty = 4;
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top  = ty + 'px';
+});
+
+canvas.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    mode = tab.dataset.mode;
+    document.querySelectorAll('.tab').forEach(t => {
+      t.className = 'tab';
+    });
+    tab.classList.add(`active-${mode}`);
+    draw();
+  });
+});
+
+draw();
+window.addEventListener('resize', draw);
+</script>
+</body>
+</html>
