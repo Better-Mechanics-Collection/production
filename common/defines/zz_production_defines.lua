@@ -2,13 +2,13 @@
 -- INDUSTRIAL PRODUCTION
 --------------------------------------------------------------------------------------------------------------
 NDefines.NProduction.BASE_FACTORY_START_EFFICIENCY_FACTOR = 6        -- Keep: historically ~6-7%
-NDefines.NProduction.BASE_FACTORY_EFFICIENCY_GAIN = 0.5              -- Was 0.6: slow down ramp-up
-NDefines.NProduction.PRODUCTION_RESOURCE_LACK_PENALTY = -0.15        -- Was -0.25: less punishing but still impactful
-NDefines.NProduction.BASE_FACTORY_MAX_EFFICIENCY_FACTOR = 30         -- Was 15: allow tech to push to ~60% cap
+NDefines.NProduction.BASE_FACTORY_EFFICIENCY_GAIN = 0.38             -- Was 0.5: slower ramp-up, efficiency feels earned (SNAKE suggestion: slower gain)
+NDefines.NProduction.PRODUCTION_RESOURCE_LACK_PENALTY = -0.32        -- Was -0.15 (too soft): harsher than vanilla -0.25, resources must matter (SNAKE suggestion)
+NDefines.NProduction.BASE_FACTORY_MAX_EFFICIENCY_FACTOR = 35         -- Was 30: higher cap rewards time investment to compensate slower gain (SNAKE suggestion)
 NDefines.NProduction.BASE_FACTORY_SPEED = 0
 NDefines.NProduction.BASE_FACTORY_SPEED_MIL = 0
 NDefines.NProduction.BASE_FACTORY_SPEED_NAV = 0
-NDefines.NProduction.POWERED_FACTORY_SPEED_MIL = 9.0                 -- Validated by spreadsheet (22.031 at 1944 peak)
+NDefines.NProduction.POWERED_FACTORY_SPEED_MIL = 6.0                 -- Was 9.0: SNAKE's gamey path (realistic path = 5.0), still elevated but not broken
 NDefines.NProduction.POWERED_FACTORY_SPEED_NAV = 5.0                 -- Validated (matches historical dockyard output)
 NDefines.NProduction.POWERED_FACTORY_SPEED = 10.0                    -- Keep
 
