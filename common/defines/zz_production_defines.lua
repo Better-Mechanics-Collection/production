@@ -10,7 +10,7 @@ NDefines.NProduction.BASE_FACTORY_SPEED_MIL = 0
 NDefines.NProduction.BASE_FACTORY_SPEED_NAV = 0
 NDefines.NProduction.POWERED_FACTORY_SPEED_MIL = 6.0                 -- Was 9.0: SNAKE's gamey path (realistic path = 5.0), still elevated but not broken
 NDefines.NProduction.POWERED_FACTORY_SPEED_NAV = 5.0                 -- Validated (matches historical dockyard output)
-NDefines.NProduction.POWERED_FACTORY_SPEED = 10.0                    -- Keep
+NDefines.NProduction.POWERED_FACTORY_SPEED = 6.7                    -- Keep
 
 -- Production switching penalties (new additions)
 NDefines.NProduction.BASE_FACTORY_EFFICIENCY_BALANCE_FACTOR = 0.05   -- Vanilla 0.1: slower recovery after switch
