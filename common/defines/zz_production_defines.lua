@@ -25,7 +25,7 @@ NDefines.NProduction.MILITARY_FACTORY_COHERENCY_BONUS = 500          -- Vanilla 
 -- REPLENISHMENT and UPKEEP MECHANICS
 --------------------------------------------------------------------------------------------------------------
 
-NDefines.NMilitary.UNIT_UPKEEP_ATTRITION = 0.05							--Constant attrition value applied to armies.
+NDefines.NMilitary.UNIT_UPKEEP_ATTRITION = 0.03							--Constant attrition value applied to armies.
 
 --------------------------------------------------------------------------------------------------------------
 -- FUEL CONSUMPTION BALANCE
